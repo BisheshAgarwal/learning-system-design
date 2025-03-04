@@ -111,3 +111,165 @@ System design is the process of defining the architecture, components, and data 
 📌 **Example:**
 
 - Facebook replicates user data across **multiple data centers** worldwide to handle millions of requests.
+
+## **Consistency Models (How Data is Synchronized Across Nodes)**
+
+Consistency determines **how quickly** data updates are visible to all nodes.
+
+- **Strong Consistency** – A read always returns the latest write. (e.g., SQL databases)
+- **Eventual Consistency** – Data updates may take time to propagate but eventually sync (e.g., NoSQL databases like DynamoDB).
+
+**Example:**
+
+- **Bank Transactions (SQL, Strong Consistency)** – A transfer must update both sender and receiver accounts instantly.
+- **Social Media Feeds (NoSQL, Eventual Consistency)** – A post might take a second to appear on all user feeds.
+
+# **CAP Theorem & ACID vs. BASE**
+
+## **1. CAP Theorem (Trade-offs in Distributed Databases)**
+
+In a **distributed database**, you can only have **two** of these three:
+
+1. **Consistency (C)** – Every read gets the latest write.
+2. **Availability (A)** – Every request gets a response (even if some nodes are down).
+3. **Partition Tolerance (P)** – The system functions even if network communication fails.
+
+|Database|Type|CAP Properties|
+|---|---|---|
+|MySQL|SQL|CA (No partition tolerance)|
+|MongoDB|NoSQL|CP (Strong consistency, partition tolerance)|
+|DynamoDB|NoSQL|AP (Availability, partition tolerance)|
+
+📌 **Example Trade-offs:**
+
+- **Google Spanner (CP)** – Prioritizes consistency in financial transactions.
+- **Amazon DynamoDB (AP)** – Prioritizes availability for fast e-commerce transactions.
+
+## **2. ACID vs. BASE (Data Consistency Models)**
+
+### **ACID (SQL Databases - Strong Consistency)**
+
+Ensures **data reliability** in transactions.
+
+1. **Atomicity** – A transaction is **all or nothing**.
+2. **Consistency** – Data remains in a valid state.
+3. **Isolation** – Transactions do not interfere with each other.
+4. **Durability** – Data is permanently stored.
+
+📌 **Example:**
+
+- If a bank transaction is interrupted mid-transfer, ACID ensures **either full transfer or nothing happens** (no money loss).
+
+### **BASE (NoSQL Databases - Eventual Consistency)**
+
+Focuses on **availability & performance** over strict consistency.
+
+1. **Basically Available** – System is almost always operational.
+2. **Soft State** – Data may change over time (not strongly consistent).
+3. **Eventual Consistency** – Data will sync but not instantly.
+
+📌 **Example:**
+
+- When you post on Twitter, your tweet may **not appear instantly** for all followers but syncs in a few seconds.
+
+# **Understanding Caching & Eviction Strategies**
+
+## **1. What is Caching?**
+
+Caching is the process of **storing frequently accessed data in a fast storage layer (like RAM)** to reduce latency and improve performance.
+### **How Caching Works**
+
+1. A user requests data from the server.
+2. The system first **checks the cache**.
+3. If data is found (**cache hit**), it's **returned instantly**.
+4. If data isn’t found (**cache miss**), it's **fetched from the database** and stored in the cache for future use.
+
+✅ **Example:**
+
+- When you **visit a website**, images, CSS, and JS files are cached in your browser to load faster next time.
+
+✅ **Benefits of Caching:**
+
+- **Faster response times**
+- **Reduces database load**
+- **Handles more traffic with fewer resources**
+## **2. Types of Caching**
+
+### **1. Application Caching (In-Memory Caching)**
+
+- Stores frequently accessed **database queries, API responses, or computations** in memory.
+- **Example:** A website caching user session data using **Redis**.
+
+### **2. Database Caching**
+
+- Stores database query results in a cache layer.
+- **Example:** MySQL’s built-in query cache, or caching in **Memcached**.
+
+### **3. Content Caching (CDNs - Content Delivery Networks)**
+
+- Stores static content like images, videos, and scripts **closer to users**.
+- **Example:** Cloudflare or AWS CloudFront caches images for faster loading.
+
+## **3. Cache Eviction Strategies (Managing Cache Memory)**
+
+Caches have **limited storage**, so old data must be removed when new data is added. This is where **cache eviction policies** come in.
+### **1. Least Recently Used (LRU)**
+
+- Removes the **oldest unused** data first.
+- **Best for:** General caching where old data becomes irrelevant over time.
+- **Example:** Web browsers remove least-used tabs from memory.
+
+### **2. Least Frequently Used (LFU)**
+
+- Removes the **least accessed** items first.
+- **Best for:** Systems with repetitive access patterns.
+- **Example:** A music streaming app caches frequently played songs.
+
+### **3. First In, First Out (FIFO)**
+
+- Removes the **oldest added** data first.
+- **Best for:** Simple caching systems.
+- **Example:** A queue-based system storing temporary API results.
+
+**Comparison Table:**
+
+|Strategy|Removes|Best Use Case|
+|---|---|---|
+|**LRU**|Least recently used data|Web browsers, session caching|
+|**LFU**|Least frequently accessed data|Recommendation systems|
+|**FIFO**|Oldest stored data|Message queues, limited cache space|
+# **Caching Solutions & CDNs**
+
+## **1. Caching Solutions: Redis & Memcached**
+
+|Feature|**Redis**|**Memcached**|
+|---|---|---|
+|**Data Storage**|Key-value store|Key-value store|
+|**Persistence**|Supports data persistence|No persistence|
+|**Data Types**|Strings, Lists, Sets, Hashes|Only Strings|
+|**Performance**|Faster for complex data structures|Faster for simple key-value pairs|
+|**Use Cases**|User sessions, leaderboards, real-time analytics|Simple caching (e.g., API responses)|
+
+✅ **When to Use Redis?**
+
+- If **you need data persistence** (storing cached data after a reboot).
+- If you need **advanced data structures** (e.g., queues, counters).
+
+✅ **When to Use Memcached?**
+
+- If **you just need simple key-value storage**.
+- If **high-speed caching** is required without persistence.
+## **2. How CDNs Improve Performance**
+
+CDNs (Content Delivery Networks) **store and distribute content from edge servers worldwide** to reduce latency.
+
+### **How CDNs Work:**
+
+1. A user requests a website (e.g., an image or video).
+2. Instead of fetching it from the **main server**, the CDN serves it from the **nearest edge server**.
+3. This reduces **load time** and **server traffic**.
+
+✅ **Example:**
+
+- **Netflix** uses CDNs to stream videos faster by caching them on global edge servers.
+- **Cloudflare, Akamai, AWS CloudFront** are popular CDN providers.
